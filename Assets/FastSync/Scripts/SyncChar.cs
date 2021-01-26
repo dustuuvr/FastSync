@@ -6,16 +6,16 @@ using VRC.Udon;
 
 namespace Dustuu.VRChat.FastSync
 {
-    public class SyncInt : UdonSharpBehaviour
+    public class SyncChar : UdonSharpBehaviour
     {
         private SyncByte[] syncBytes;
 
         protected void Start() { syncBytes = GetComponentsInChildren<SyncByte>(); }
 
-        // Call this method to request a new value for the SyncInt
-        public void RequestInt(int request)
+        // Call this method to request a new value for the SyncChar
+        public void RequestChar(char request)
         {
-            byte[] requestBytes = Int32ToBytes(request);
+            byte[] requestBytes = CharToBytes(request);
             if (syncBytes.Length == requestBytes.Length)
             {
                 for (int i = 0; i < syncBytes.Length; i++) { syncBytes[i].RequestByte(requestBytes[i]); }
@@ -24,31 +24,29 @@ namespace Dustuu.VRChat.FastSync
             else { Debug.LogError("[FastSync] request bytes length mismatch!"); }
         }
 
-        // Called from RequestInt via SendCustomNetworkEvent
+        // Called from RequestChar via SendCustomNetworkEvent
         public void Convert() { foreach (SyncByte syncByte in syncBytes) { syncByte.Convert(); } }
 
-        public int GetUdonSynced() { return GetSynced(false); }
-        public int GetFastSynced() { return GetSynced(true); }
-        private int GetSynced(bool fast)
+        public char GetUdonSynced() { return GetSynced(false); }
+        public char GetFastSynced() { return GetSynced(true); }
+        private char GetSynced(bool fast)
         {
-            if (syncBytes == null) { return 0; }
+            if (syncBytes == null) { return '\0'; }
 
             byte[] bytes = new byte[syncBytes.Length];
             for (int i = 0; i < bytes.Length; i++) { bytes[i] = fast ? syncBytes[i].GetFastSynced() : syncBytes[i].GetUdonSynced(); }
-            return BytesToInt32(bytes);
+            return BytesToChar(bytes);
         }
 
         // Assumes Big-Endian order
-        private int BytesToInt32(byte[] input) { return (input[0] << 24) | (input[1] << 16) | (input[2] << 8) | (input[3]); }
+        private char BytesToChar(byte[] input) { return (char)((input[0] << 8) | (input[1])); }
 
         // Assumes Big-Endian order
-        private byte[] Int32ToBytes(int input)
+        private byte[] CharToBytes(char input)
         {
-            byte[] output = new byte[4];
-            output[0] = (byte)((input >> 24) % 256);
-            output[1] = (byte)((input >> 16) % 256);
-            output[2] = (byte)((input >> 8) % 256);
-            output[3] = (byte)(input % 256);
+            byte[] output = new byte[2];
+            output[0] = (byte)((input >> 8) % 256);
+            output[1] = (byte)(input % 256);
             return output;
         }
     }
