@@ -77,5 +77,6 @@ crashlytics-build.properties
 /Packages/com.vrchat.vrcsdk3/
 /Assets/CyanEmu/
 /Assets/CyanEmu.meta
+/Assets/Gizmos.meta
 
 bakery_times.log
