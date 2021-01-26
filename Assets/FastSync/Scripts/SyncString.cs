@@ -8,20 +8,32 @@ namespace Dustuu.VRChat.FastSync
 {
     public class SyncString : UdonSharpBehaviour
     {
-        private SyncByte[] syncBytes;
+        private SyncChar[] syncChars;
+        private string data = "";
 
-        protected void Start() { syncBytes = GetComponentsInChildren<SyncByte>(); }
+        protected void Start() { syncChars = GetComponentsInChildren<SyncChar>(); }
 
         // Call this method to request a new value for the SyncString
         public void RequestString(string request)
         {
-            /*byte[] requestBytes = Int32ToBytes(request);
-            if (syncBytes.Length == requestBytes.Length)
-            {
-                for (int i = 0; i < syncBytes.Length; i++) { syncBytes[i].RequestByte(requestBytes[i]); }
-                SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "Convert");
-            }
-            else { Debug.LogError("[FastSync] request bytes length mismatch!"); }*/
+            // Shorten the string if it's too long
+            if ( request.Length > GetMaxChars()) { request = request.Substring(0, GetMaxChars()); }
+            char[] requestChars = request.ToCharArray();
+            for (int i = 0; i < syncChars.Length; i++) { syncChars[i].RequestChar(i < requestChars.Length ? requestChars[i] : '\0'); }
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.All, "CombineData");
+        }
+
+        public string GetData() { return data; }
+
+        public int GetMaxChars() { return syncChars.Length; }
+
+        // TODO: Implement this cache pattern on other sync types
+        // Called from RequestString via SendCustomNetworkEvent
+        public void CombineData()
+        {
+            char[] dataChars = new char[syncChars.Length];
+            for (int i = 0; i < dataChars.Length; i++) { dataChars[i] = syncChars[i].GetFastSynced(); }
+            data = new string(dataChars);
         }
     }
 }
