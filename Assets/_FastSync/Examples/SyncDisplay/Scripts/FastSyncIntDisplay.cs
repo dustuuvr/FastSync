@@ -33,7 +33,7 @@ namespace Dustuu.VRChat.FastSync.Examples
         {
             if (IsValidInput(inputField.text))
             {
-                fastSyncInt.RequestUInt(int.Parse(inputField.text));
+                fastSyncInt.RequestInt(int.Parse(inputField.text));
                 inputField.text = string.Empty;
             }
         }

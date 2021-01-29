@@ -13,7 +13,7 @@ namespace Dustuu.VRChat.FastSync
         private int data;
 
         // Call this method to change the int
-        public void RequestUInt(int request) { GetFastSyncUInt().RequestUInt(IntToUInt(request)); }
+        public void RequestInt(int request) { GetFastSyncUInt().RequestUInt(IntToUInt(request)); }
 
         private FastSyncUInt GetFastSyncUInt()
         { return fastSyncUInt != null ? fastSyncUInt : fastSyncUInt = GetComponentInChildren<FastSyncUInt>(); }
