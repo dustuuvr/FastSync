@@ -7,7 +7,7 @@ A tool for syncing VRChat UdonSharp data over the network instead of using UdonS
 3. Install the latest release of [FastSync](https://github.com/dustuu/FastSync/releases)
 
 ## Examples
-- Open Assets/FastSync/Examples/Scenes/CalculatorExampleScene.unity for an example of usage.
+- Open Assets/_FastSync/Examples/Scenes/FastSyncExampleScene.unity for an example of usage.
 
 ## Notes
 - Work-in-progress
