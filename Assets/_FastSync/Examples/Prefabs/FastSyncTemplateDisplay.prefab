@@ -59,7 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.31204927, g: 0.754717, b: 0.29547882, a: 1}
+  m_Color: {r: 0.376602, g: 0.8584906, b: 0.7587988, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -471,7 +471,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2455214991622462580}
   m_Layer: 0
-  m_Name: Display
+  m_Name: FastSyncTemplateDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

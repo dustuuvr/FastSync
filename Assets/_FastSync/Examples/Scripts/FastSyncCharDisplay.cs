@@ -16,20 +16,12 @@ namespace Dustuu.VRChat.FastSync.Examples
 
         protected void Update()
         {
-            char displayData = fastSyncChar.GetData();
             // char.MinValue ('\0') causes the Unity UI Text to glitch, so we need to remove it here
-            dataLabelText.text = $"FastSyncChar: '{(displayData != char.MinValue ? displayData.ToString() : "")}'";
-
-            if (IsValidInput(inputField.text))
-            {
-                inputField.textComponent.color = Color.green;
-                submitButton.interactable = true;
-            }
-            else
-            {
-                inputField.textComponent.color = Color.red;
-                submitButton.interactable = false;
-            }
+            dataLabelText.text = $"FastSyncChar: '{(fastSyncChar.GetData() != char.MinValue ? fastSyncChar.GetData().ToString() : string.Empty)}'";
+            bool isValidInput = IsValidInput(inputField.text);
+            inputField.textComponent.color = isValidInput ? Color.green : Color.red;
+            submitButton.GetComponentInChildren<Text>().color = isValidInput ? Color.green : Color.red;
+            submitButton.interactable = isValidInput;
         }
 
         private bool IsValidInput(string input)
@@ -39,6 +31,12 @@ namespace Dustuu.VRChat.FastSync.Examples
         }
 
         public void SubmitInput()
-        { if (IsValidInput(inputField.text)) { fastSyncChar.RequestChar(char.Parse(inputField.text)); } }
+        {
+            if (IsValidInput(inputField.text))
+            {
+                fastSyncChar.RequestChar(char.Parse(inputField.text));
+                inputField.text = string.Empty;
+            }
+        }
     }
 }

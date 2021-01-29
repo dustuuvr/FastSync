@@ -12,11 +12,11 @@ namespace Dustuu.VRChat.FastSync
         private FastSyncByteManager fastSyncByteManager;
         private uint data;
 
-        private FastSyncByteManager GetFastSyncByteManager()
-        { return fastSyncByteManager != null ? fastSyncByteManager : fastSyncByteManager = GetComponentInChildren<FastSyncByteManager>(); }
-
         // Call this method to change the uint
         public void RequestUInt(uint request) { GetFastSyncByteManager().RequestBytes(UInt32ToBytes(request)); }
+
+        private FastSyncByteManager GetFastSyncByteManager()
+        { return fastSyncByteManager != null ? fastSyncByteManager : fastSyncByteManager = GetComponentInChildren<FastSyncByteManager>(); }
 
         private void FastSyncUIntChanged()
         {

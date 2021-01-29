@@ -7,29 +7,33 @@ using VRC.Udon;
 
 namespace Dustuu.VRChat.FastSync.Examples
 {
-    public class FastSyncStringDisplay : UdonSharpBehaviour
+    public class FastSyncIntDisplay : UdonSharpBehaviour
     {
-        [SerializeField] private FastSyncString fastSyncString;
+        [SerializeField] private FastSyncInt fastSyncInt;
         [SerializeField] private Text dataLabelText;
         [SerializeField] private InputField inputField;
         [SerializeField] private Button submitButton;
 
         protected void Update()
         {
-            dataLabelText.text = $"FastSyncString: '{fastSyncString.GetData()}'";
+            dataLabelText.text = $"FastSyncInt: '{fastSyncInt.GetData()}'";
             bool isValidInput = IsValidInput(inputField.text);
             inputField.textComponent.color = isValidInput ? Color.green : Color.red;
             submitButton.GetComponentInChildren<Text>().color = isValidInput ? Color.green : Color.red;
             submitButton.interactable = isValidInput;
         }
 
-        private bool IsValidInput(string input) { return input.Length <= fastSyncString.GetMaxChars(); }
+        private bool IsValidInput(string input)
+        {
+            int result;
+            return int.TryParse(input, out result);
+        }
 
         public void SubmitInput()
         {
             if (IsValidInput(inputField.text))
             {
-                fastSyncString.RequestString(inputField.text);
+                fastSyncInt.RequestUInt(int.Parse(inputField.text));
                 inputField.text = string.Empty;
             }
         }

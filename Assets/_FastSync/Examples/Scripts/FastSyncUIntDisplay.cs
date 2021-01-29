@@ -17,17 +17,10 @@ namespace Dustuu.VRChat.FastSync.Examples
         protected void Update()
         {
             dataLabelText.text = $"FastSyncUInt: '{fastSyncUInt.GetData()}'";
-
-            if (IsValidInput(inputField.text))
-            {
-                inputField.textComponent.color = Color.green;
-                submitButton.interactable = true;
-            }
-            else
-            {
-                inputField.textComponent.color = Color.red;
-                submitButton.interactable = false;
-            }
+            bool isValidInput = IsValidInput(inputField.text);
+            inputField.textComponent.color = isValidInput ? Color.green : Color.red;
+            submitButton.GetComponentInChildren<Text>().color = isValidInput ? Color.green : Color.red;
+            submitButton.interactable = isValidInput;
         }
 
         private bool IsValidInput(string input)
@@ -37,6 +30,12 @@ namespace Dustuu.VRChat.FastSync.Examples
         }
 
         public void SubmitInput()
-        { if (IsValidInput(inputField.text)) { fastSyncUInt.RequestUInt(uint.Parse(inputField.text)); } }
+        {
+            if (IsValidInput(inputField.text))
+            {
+                fastSyncUInt.RequestUInt(uint.Parse(inputField.text));
+                inputField.text = string.Empty;
+            }
+        }
     }
 }

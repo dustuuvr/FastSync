@@ -10,7 +10,7 @@ namespace Dustuu.VRChat.FastSync
     {
         [SerializeField] private UdonSharpBehaviour[] fastSyncStringChangedSubscribers;
         private FastSyncCharManager fastSyncCharManager;
-        private string data;
+        private string data = string.Empty;
 
         private FastSyncCharManager GetFastSyncCharManager()
         { return fastSyncCharManager != null ? fastSyncCharManager : fastSyncCharManager = GetComponentInChildren<FastSyncCharManager>(); }
