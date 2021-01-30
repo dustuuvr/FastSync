@@ -8,6 +8,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
 {
     public class VideoBrowser : UdonSharpBehaviour
     {
+        [SerializeField] private VideoRequestManager videoRequestManager;
         [SerializeField] private VideoCollection videoCollectionRoot;
         // private string browserPath;
         private VideoCollection videoCollectionView;
@@ -17,23 +18,45 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             SetVideoCollectionView(videoCollectionRoot);
         }
 
+        private int GetNetworkTime() { return Networking.GetServerTimeInMilliseconds(); }
+        private string GetLocalUsername() { return Networking.LocalPlayer.displayName; }
+
         protected void Update()
         {
-            VideoCollection videoCollectionViewNew = null;
-            if (Input.GetKeyDown(KeyCode.Alpha1)) { videoCollectionViewNew = Test(0); }
-            else if (Input.GetKeyDown(KeyCode.Alpha2)) { videoCollectionViewNew = Test(1); }
-            else if (Input.GetKeyDown(KeyCode.Alpha3)) { videoCollectionViewNew = Test(2); }
-            else if (Input.GetKeyDown(KeyCode.Alpha4)) { videoCollectionViewNew = Test(3); }
-            else if (Input.GetKeyDown(KeyCode.Alpha5)) { videoCollectionViewNew = Test(4); }
-            else if (Input.GetKeyDown(KeyCode.Backspace)) { videoCollectionViewNew = GetVideoCollectionView().GetVideoCollectionParent(); }
-
-            if (videoCollectionViewNew!= null) { SetVideoCollectionView(videoCollectionViewNew); }
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                VideoDetail videoToPlay = null;
+                if (Input.GetKeyDown(KeyCode.Alpha1)) { videoToPlay = VD(0); }
+                else if (Input.GetKeyDown(KeyCode.Alpha2)) { videoToPlay = VD(1); }
+                else if (Input.GetKeyDown(KeyCode.Alpha3)) { videoToPlay = VD(2); }
+                else if (Input.GetKeyDown(KeyCode.Alpha4)) { videoToPlay = VD(3); }
+                else if (Input.GetKeyDown(KeyCode.Alpha5)) { videoToPlay = VD(4); }
+                if ( videoToPlay != null ) { videoRequestManager.MakeRequest(GetNetworkTime(), GetLocalUsername(), videoToPlay.GetUrl()); }
+            }
+            else
+            {
+                VideoCollection videoCollectionViewNew = null;
+                if (Input.GetKeyDown(KeyCode.Alpha1)) { videoCollectionViewNew = VC(0); }
+                else if (Input.GetKeyDown(KeyCode.Alpha2)) { videoCollectionViewNew = VC(1); }
+                else if (Input.GetKeyDown(KeyCode.Alpha3)) { videoCollectionViewNew = VC(2); }
+                else if (Input.GetKeyDown(KeyCode.Alpha4)) { videoCollectionViewNew = VC(3); }
+                else if (Input.GetKeyDown(KeyCode.Alpha5)) { videoCollectionViewNew = VC(4); }
+                else if (Input.GetKeyDown(KeyCode.Backspace)) { videoCollectionViewNew = GetVideoCollectionView().GetVideoCollectionParent(); }
+                if (videoCollectionViewNew != null) { SetVideoCollectionView(videoCollectionViewNew); }
+            }
         }
 
-        private VideoCollection Test(int index)
+        private VideoCollection VC(int index)
         {
             if (index < GetVideoCollectionView().GetVideoCollections().Length)
             { return GetVideoCollectionView().GetVideoCollections()[index]; }
+            else { return null; }
+        }
+
+        private VideoDetail VD(int index)
+        {
+            if (index < GetVideoCollectionView().GetVideoDetails().Length)
+            { return GetVideoCollectionView().GetVideoDetails()[index]; }
             else { return null; }
         }
 

@@ -8,6 +8,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
 {
     public class VideoRequestManager : UdonSharpBehaviour
     {
+        [SerializeField] private VideoStreamer videoStreamer;
         private VideoRequest[] videoRequests;
         private VideoRequest[] videoRequestsSorted;
 
@@ -18,13 +19,14 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({time}, {username}, {url.Get()})."); }
         }
 
-        public void OnVideoRequestChanged() { videoRequestsSorted = GetSortedNonEmptyVideoRequests(); }
-
-        // Lazy loading caches
-        private VideoRequest[] GetVideoRequests()
-        { return videoRequests != null ? videoRequests : videoRequests = GetComponentsInChildren<VideoRequest>(); }
-        private VideoRequest[] GetVideoRequestsSorted()
-        { return videoRequestsSorted != null ? videoRequestsSorted : videoRequestsSorted = new VideoRequest[0]; }
+        public void OnVideoRequestChanged()
+        {
+            // TODO: Only play if everything has finished loading in (int,string,url)
+            videoRequestsSorted = GetSortedNonEmptyVideoRequests();
+            VideoRequest currentVideoRequest = GetCurrentVideoRequest();
+            if (currentVideoRequest != null) { videoStreamer.SetVideoRequest(currentVideoRequest); }
+            else { Debug.Log("currentVideoRequest is null"); }
+        }
 
         // Helper functions to organize VideoRequests
         private VideoRequest GetCurrentVideoRequest() { return GetVideoRequestsSorted().Length > 0 ? GetVideoRequestsSorted()[0] : null; }
@@ -49,6 +51,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
         private VideoRequest GetRandomEmptyVideoRequest()
         {
             VideoRequest[] emptyVideoRequests = GetEmptyVideoRequests();
+            Debug.Log($"emptyVideoRequests.Length: {emptyVideoRequests.Length}");
             int firstIndex = Random.Range(0, emptyVideoRequests.Length);
             for (int i = firstIndex; i < emptyVideoRequests.Length; i++) { if (emptyVideoRequests[i].IsEmpty()) { return emptyVideoRequests[i]; } }
             for (int i = 0; i < firstIndex; i++) { if (emptyVideoRequests[i].IsEmpty()) { return emptyVideoRequests[i]; } }
@@ -59,7 +62,9 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
         private VideoRequest[] GetVideoRequestsWithDesiredEmptyStatus(bool desiredEmptyStatus)
         {
             int videoRequestsWithDesiredEmptyStatusCount = 0;
-            foreach (VideoRequest videoRequest in videoRequests) { if (videoRequest.IsEmpty() == desiredEmptyStatus) { videoRequestsWithDesiredEmptyStatusCount++; } }
+            Debug.Log($"GetVideoRequests().Length: { GetVideoRequests().Length}");
+            foreach (VideoRequest videoRequest in GetVideoRequests()) { if (videoRequest.IsEmpty() == desiredEmptyStatus) { videoRequestsWithDesiredEmptyStatusCount++; } }
+            Debug.Log($"videoRequestsWithDesiredEmptyStatusCount: { videoRequestsWithDesiredEmptyStatusCount}");
 
             VideoRequest[] videoRequestsWithDesiredEmptyStatus = new VideoRequest[videoRequestsWithDesiredEmptyStatusCount];
             int nonEmptyVideoRequestsNextIndex = 0;
@@ -67,5 +72,11 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             { if (videoRequest.IsEmpty() == desiredEmptyStatus) { videoRequestsWithDesiredEmptyStatus[nonEmptyVideoRequestsNextIndex++] = videoRequest; } }
             return videoRequestsWithDesiredEmptyStatus;
         }
+
+        // Lazy loading caches
+        private VideoRequest[] GetVideoRequests()
+        { return videoRequests != null ? videoRequests : videoRequests = GetComponentsInChildren<VideoRequest>(); }
+        private VideoRequest[] GetVideoRequestsSorted()
+        { return videoRequestsSorted != null ? videoRequestsSorted : videoRequestsSorted = new VideoRequest[0]; }
     }
 }

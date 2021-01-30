@@ -10,22 +10,26 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
     public class VideoStreamer : UdonSharpBehaviour
     {
         private BaseVRCVideoPlayer baseVrcVideoPlayer;
-        private VideoRequestManager videoRequestManager;
+        private VideoRequest videoRequest;
 
-        /*public void MakeRequestVideoDetail(string videoDetailPath)
+        private void Update()
         {
-            VideoDetail request = videoCollectionRoot.GetVideoDetail(videoDetailPath);
-            if (request != null) { GetVideoRequestManager().MakeRequest(GetNetworkTime(), GetLocalUsername(), request.GetUrl()); }
-            else { Debug.LogError($"[VideoQueuePlayer] VideoStreamer: Invalid videoDetailPath '{videoDetailPath}'."); }
-        }*/
+            if (videoRequest != null && videoRequest.IsFull())
+            {
+                if (!GetBaseVRCVideoPlayer().IsPlaying)
+                {
+                    VRCUrl url = videoRequest.GetUrl();
+                    Debug.Log($"Attempting to PlayVideo: {url.Get()}");
+                    GetBaseVRCVideoPlayer().PlayURL(url);
+                    videoRequest = null;
+                }
+            }
+        }
 
-        private int GetNetworkTime() { return Networking.GetServerTimeInMilliseconds(); }
-        private string GetLocalUsername() { return Networking.LocalPlayer.displayName; }
+        public void SetVideoRequest(VideoRequest videoRequest) { this.videoRequest = videoRequest; }
 
         // Lazy loading caches
         private BaseVRCVideoPlayer GetBaseVRCVideoPlayer()
         { return baseVrcVideoPlayer != null ? baseVrcVideoPlayer : baseVrcVideoPlayer = (BaseVRCVideoPlayer)GetComponent(typeof(BaseVRCVideoPlayer)); }
-        private VideoRequestManager GetVideoRequestManager()
-        { return videoRequestManager != null ? videoRequestManager : videoRequestManager = GetComponentInChildren<VideoRequestManager>(); }
     }
 }

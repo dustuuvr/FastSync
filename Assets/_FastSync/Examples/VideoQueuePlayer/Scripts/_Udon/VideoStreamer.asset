@@ -24,7 +24,7 @@ MonoBehaviour:
     SerializedFormat: 2
     SerializedBytes: 
     ReferencedUnityObjects:
-    - {fileID: 11500000, guid: f6dab916ffe430e43bf7c9b2253c22cf, type: 3}
+    - {fileID: 11500000, guid: c897b79be041c6b4fb129bd5257f7ccd, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -112,7 +112,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: videoRequestManager
+      Data: videoRequest
     - Name: $v
       Entry: 7
       Data: 6|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -124,8 +124,7 @@ MonoBehaviour:
       Data: 8|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem.VideoRequestManager,
-        Assembly-CSharp
+      Data: Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem.VideoRequest, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
@@ -140,10 +139,10 @@ MonoBehaviour:
       Data: VRCUdonUdonBehaviour
     - Name: symbolOriginalName
       Entry: 1
-      Data: videoRequestManager
+      Data: videoRequest
     - Name: symbolUniqueName
       Entry: 1
-      Data: videoRequestManager
+      Data: videoRequest
     - Name: symbolDefaultValue
       Entry: 6
       Data: 

@@ -10,19 +10,19 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
     {
         [SerializeField] private FastSyncInt time;
         [SerializeField] private FastSyncString username;
-        [UdonSynced] private VRCUrl url;
+        [UdonSynced] private VRCUrl url = VRCUrl.Empty;
         private VideoRequestManager videoRequestManager;
 
         public void MakeRequest(int time, string username, VRCUrl url)
         {
             if (IsEmpty())
             {
-                // Fast Syncing
-                this.time.RequestInt(time);
-                this.username.RequestString(username);
                 // Traditional Syncing
                 SetOwnerLocal(gameObject);
                 this.url = url;
+                // Fast Syncing
+                this.time.RequestInt(time);
+                this.username.RequestString(username);
             }
             else { Debug.LogError("[VideoQueuePlayer] VideoRequest: Tried to call MakeRequest but was not empty."); }
         }
@@ -31,16 +31,24 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
         public string GetUsername() { return username.GetData(); }
         public VRCUrl GetUrl() { return url; }
 
-        public void ClearRequest() { MakeRequest(int.MinValue, string.Empty, VRCUrl.Empty); }
+        public void ClearRequest() { MakeRequest(0, string.Empty, VRCUrl.Empty); }
 
-        public bool IsEmpty()
-        { return time.GetData() == int.MinValue && username.GetData() == string.Empty && url.Get() == string.Empty; }
+        public bool IsEmpty() { return time.GetData() == 0 && username.GetData() == string.Empty && url.Get() == string.Empty; }
+        public bool IsFull() { return time.GetData() != 0 && username.GetData() != string.Empty && url.Get() != string.Empty; }
 
         // Called from FastSyncInt via SendCustomEvent
-        public void OnFastSyncIntChanged() { VideoRequestChanged(); }
+        public void OnFastSyncIntChanged()
+        {
+            Debug.Log("OnFastSyncIntChanged");
+            VideoRequestChanged();
+        }
 
         // Called from FastSyncString via SendCustomEvent
-        public void OnFastSyncStringChanged() { VideoRequestChanged(); }
+        public void OnFastSyncStringChanged()
+        {
+            Debug.Log("OnFastSyncStringChanged");
+            VideoRequestChanged();
+        }
 
         private void VideoRequestChanged() { if (GetVideoRequestManager() != null) { GetVideoRequestManager().OnVideoRequestChanged(); } }
 
