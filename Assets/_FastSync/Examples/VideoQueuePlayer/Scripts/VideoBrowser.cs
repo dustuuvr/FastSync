@@ -18,9 +18,6 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             SetVideoCollectionView(videoCollectionRoot);
         }
 
-        private int GetNetworkTime() { return Networking.GetServerTimeInMilliseconds(); }
-        private string GetLocalUsername() { return Networking.LocalPlayer.displayName; }
-
         protected void Update()
         {
             if (Input.GetKey(KeyCode.LeftShift))
@@ -31,7 +28,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
                 else if (Input.GetKeyDown(KeyCode.Alpha3)) { videoToPlay = VD(2); }
                 else if (Input.GetKeyDown(KeyCode.Alpha4)) { videoToPlay = VD(3); }
                 else if (Input.GetKeyDown(KeyCode.Alpha5)) { videoToPlay = VD(4); }
-                if ( videoToPlay != null ) { videoRequestManager.MakeRequest(GetNetworkTime(), GetLocalUsername(), videoToPlay.GetUrl()); }
+                if ( videoToPlay != null ) { videoRequestManager.MakeRequest(videoToPlay.GetUrl()); }
             }
             else
             {

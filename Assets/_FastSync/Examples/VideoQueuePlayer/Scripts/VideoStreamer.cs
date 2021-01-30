@@ -14,15 +14,15 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
 
         private void Update()
         {
-            if (videoRequest != null && videoRequest.IsFull())
+            if (videoRequest != null && videoRequest.IsFull() && videoRequest.HasStarted() )
             {
-                if (!GetBaseVRCVideoPlayer().IsPlaying)
-                {
-                    VRCUrl url = videoRequest.GetUrl();
-                    Debug.Log($"Attempting to PlayVideo: {url.Get()}");
-                    GetBaseVRCVideoPlayer().PlayURL(url);
-                    videoRequest = null;
-                }
+                if (GetBaseVRCVideoPlayer().IsPlaying) { GetBaseVRCVideoPlayer().Stop(); }
+
+                VRCUrl url = videoRequest.GetUrl();
+                Debug.Log($"Attempting to PlayVideo: {url.Get()}");
+                GetBaseVRCVideoPlayer().PlayURL(url);
+                GetBaseVRCVideoPlayer().SetTime(videoRequest.GetTimeSinceStarted());
+                videoRequest = null;
             }
         }
 

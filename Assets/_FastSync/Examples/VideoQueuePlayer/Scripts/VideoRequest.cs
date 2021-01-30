@@ -11,6 +11,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
         [SerializeField] private FastSyncInt time;
         [SerializeField] private FastSyncString username;
         [UdonSynced] private VRCUrl url = VRCUrl.Empty;
+        [SerializeField] private FastSyncInt timeStarted;
         private VideoRequestManager videoRequestManager;
 
         public void MakeRequest(int time, string username, VRCUrl url)
@@ -27,9 +28,20 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             else { Debug.LogError("[VideoQueuePlayer] VideoRequest: Tried to call MakeRequest but was not empty."); }
         }
 
+        public void TryPlay()
+        {
+            Debug.Log("Trying to Play!");
+            if (!HasStarted()) { timeStarted.RequestInt(GetVideoRequestManager().GetNetworkTime()); }
+            GetVideoRequestManager().GetVideoStreamer().SetVideoRequest(this);
+        }
+
         public int GetTime() { return time.GetData(); }
         public string GetUsername() { return username.GetData(); }
         public VRCUrl GetUrl() { return url; }
+        public int GetTimeStarted() { return timeStarted.GetData(); }
+        public bool HasStarted() { return GetTimeStarted() != 0; }
+
+        public int GetTimeSinceStarted() { return GetVideoRequestManager().GetNetworkTime() - GetTimeStarted(); }
 
         public void ClearRequest() { MakeRequest(0, string.Empty, VRCUrl.Empty); }
 

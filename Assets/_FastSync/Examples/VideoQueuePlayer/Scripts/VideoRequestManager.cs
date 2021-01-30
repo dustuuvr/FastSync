@@ -12,8 +12,10 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
         private VideoRequest[] videoRequests;
         private VideoRequest[] videoRequestsSorted;
 
-        public void MakeRequest(int time, string username, VRCUrl url)
+        public void MakeRequest(VRCUrl url)
         {
+            int time = GetNetworkTime();
+            string username = GetLocalUsername();
             VideoRequest randomEmptyVideoRequest = GetRandomEmptyVideoRequest();
             if (randomEmptyVideoRequest != null) { randomEmptyVideoRequest.MakeRequest(time, username, url); }
             else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({time}, {username}, {url.Get()})."); }
@@ -24,7 +26,7 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             // TODO: Only play if everything has finished loading in (int,string,url)
             videoRequestsSorted = GetSortedNonEmptyVideoRequests();
             VideoRequest currentVideoRequest = GetCurrentVideoRequest();
-            if (currentVideoRequest != null) { videoStreamer.SetVideoRequest(currentVideoRequest); }
+            if (currentVideoRequest != null) { currentVideoRequest.TryPlay(); }
             else { Debug.Log("currentVideoRequest is null"); }
         }
 
@@ -73,10 +75,16 @@ namespace Dustuu.VRChat.FastSync.Examples.VideoQueuePlayerSystem
             return videoRequestsWithDesiredEmptyStatus;
         }
 
+        public VideoStreamer GetVideoStreamer() { return videoStreamer; }
+
         // Lazy loading caches
         private VideoRequest[] GetVideoRequests()
         { return videoRequests != null ? videoRequests : videoRequests = GetComponentsInChildren<VideoRequest>(); }
         private VideoRequest[] GetVideoRequestsSorted()
         { return videoRequestsSorted != null ? videoRequestsSorted : videoRequestsSorted = new VideoRequest[0]; }
+
+        // TODO: Move these into a central utility location
+        public int GetNetworkTime() { return Networking.GetServerTimeInMilliseconds(); }
+        public string GetLocalUsername() { return Networking.LocalPlayer.displayName; }
     }
 }
