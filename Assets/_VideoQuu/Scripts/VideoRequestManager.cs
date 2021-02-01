@@ -1,4 +1,5 @@
 ﻿
+using Dustuu.VRChat.Uutils.VideoQuuSystem.UI;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -8,8 +9,10 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
 {
     public class VideoRequestManager : UdonSharpBehaviour
     {
-        [SerializeField] private VideoStreamer videoStreamer;
+        public readonly int MAX_ACTIVE_REQUESTS_TOTAL = 15;
+
         private VideoRequest[] videoRequests;
+        private VideoRequest[] videoRequestsFilteredCache;
 
         public void MakeRequest(VRCUrl url)
         {
@@ -18,14 +21,34 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({url.Get()})."); }
         }
 
-        public void OnVideoRequestChanged()
+        public void AddEventSubscriberOnVideoRequestsChanged(UdonSharpBehaviour eventSubscriberOnVideoRequestsChanged)
+        {
+            if (onVideoRequestsChangedSubscribersIndex >= GetOnVideoRequestsChangedSubscribers().Length)
+            {
+                Debug.LogError("Max onVideoRequestsChangedSubscribers reached");
+                return;
+            }
+            if (eventSubscriberOnVideoRequestsChanged == null)
+            {
+                Debug.LogError("Can't add null subscriber!");
+                return;
+            }
+
+            GetOnVideoRequestsChangedSubscribers()[onVideoRequestsChangedSubscribersIndex++] = eventSubscriberOnVideoRequestsChanged;
+        }
+
+        public VideoRequest[] GetVideoRequestsSortedCache() { return videoRequestsFilteredCache != null ? videoRequestsFilteredCache : videoRequestsFilteredCache = new VideoRequest[0]; }
+
+        public void OnVideoRequestsChanged()
         {
             Debug.Log("Updating / sorting video requests!");
-            GetVideoStreamer().SetVideoRequests(GetSortedValidVideoRequests());
+            videoRequestsFilteredCache = GetFilteredVideoRequests();
+            for (int i = 0; i < GetOnVideoRequestsChangedSubscribers().Length && GetOnVideoRequestsChangedSubscribers()[i] != null; i++)
+            { GetOnVideoRequestsChangedSubscribers()[i].SendCustomEvent("OnVideoRequestsChanged"); }
         }
 
         // Helper functions to organize VideoRequests
-        private VideoRequest[] GetSortedValidVideoRequests()
+        private VideoRequest[] GetFilteredVideoRequests()
         {
             VideoRequest[] validVideoRequests = GetValidVideoRequests();
             VideoRequest temp;
@@ -73,11 +96,15 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             return unclaimedVideoRequests;
         }
 
-        public VideoStreamer GetVideoStreamer() { return videoStreamer; }
-
         // Lazy loading caches
         private VideoRequest[] GetVideoRequests()
         { return videoRequests != null ? videoRequests : videoRequests = GetComponentsInChildren<VideoRequest>(); }
+
+        // TODO: Use this style of event subscription in FastSync instead of SerializedFields
+        private UdonSharpBehaviour[] onVideoRequestsChangedSubscribers;
+        private int onVideoRequestsChangedSubscribersIndex = 0;
+        private UdonSharpBehaviour[] GetOnVideoRequestsChangedSubscribers()
+        { return onVideoRequestsChangedSubscribers != null ? onVideoRequestsChangedSubscribers : onVideoRequestsChangedSubscribers = new UdonSharpBehaviour[10]; }
 
         // TODO: Move these into a central utility location
         public int GetNetworkTimeMilliseconds() { return Networking.GetServerTimeInMilliseconds(); }

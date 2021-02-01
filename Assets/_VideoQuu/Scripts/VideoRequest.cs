@@ -36,7 +36,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         {
             if (!changesRegistered && IsValid())
             {
-                GetVideoRequestManager().OnVideoRequestChanged();
+                GetVideoRequestManager().OnVideoRequestsChanged();
                 changesRegistered = true;
             }
         }

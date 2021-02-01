@@ -8,11 +8,15 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
 {
     public class VideoStreamer : UdonSharpBehaviour
     {
+        [SerializeField] private VideoRequestManager videoRequestManager;
+
         private VideoRequest[] videoRequests;
         private VideoRequest videoRequestLast;
 
-        // TODO: Just set current?
-        public void SetVideoRequests(VideoRequest[] videoRequests) { this.videoRequests = videoRequests; }
+        // This is called via SendCustomEvent from VideoRequestManager
+        public void OnVideoRequestsChanged() { videoRequests = videoRequestManager.GetVideoRequestsSortedCache(); }
+
+        protected void Start() { videoRequestManager.AddEventSubscriberOnVideoRequestsChanged(this); }
 
         protected void Update()
         {
