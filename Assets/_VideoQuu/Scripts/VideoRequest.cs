@@ -16,41 +16,78 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         // Variables required to play
         [UdonSynced] private int startTimeMilliseconds;
         [UdonSynced] private int durationMilliseconds;
-        // Other
-        private bool changesRegistered;
         // Caches
         private VideoRequestManager videoRequestManager;
 
         protected void Start()
         {
-            ClearAttributes();
+            if (Networking.IsOwner(gameObject)) { ClearAttributesInternal(); }
         }
 
+        // Variables required to view
+        private bool isClaimedLast;
+        private int requestTimeMillisecondsLast;
+        private string requestorUsernameLast;
+        private string urlLast;
+        // Variables required to play
+       private int startTimeMillisecondsLast;
+       private int durationMillisecondsLast;
+
+        private bool firstDeserialization = true;
         public override void OnDeserialization()
         {
-            Debug.Log("OnDeserialization() run");
-            HandleChanges();
-        }
-
-        private void HandleChanges()
-        {
-            if (!changesRegistered && IsValid())
+            if (firstDeserialization)
             {
-                GetVideoRequestManager().OnVideoRequestsChanged();
-                changesRegistered = true;
+                SetLasts();
+                firstDeserialization = false;
+            }
+
+            if ( HasChanged() )
+            {
+                Debug.Log("OnDeserialization() changes detected!");
+                HandleChanges();
+                SetLasts();
             }
         }
 
-        private void ClearAttributes()
+        private bool HasChanged()
         {
+            return
+                isClaimed != isClaimedLast ||
+                requestTimeMilliseconds != requestTimeMillisecondsLast ||
+                requestorUsername != requestorUsernameLast ||
+                url.Get() != urlLast ||
+                startTimeMilliseconds != startTimeMillisecondsLast ||
+                durationMilliseconds != durationMillisecondsLast;
+        }
+
+        private void SetLasts()
+        {
+            isClaimedLast = isClaimed;
+            requestTimeMillisecondsLast = requestTimeMilliseconds;
+            requestorUsernameLast = requestorUsername;
+            urlLast = url.Get();
+            startTimeMillisecondsLast = startTimeMilliseconds;
+            durationMillisecondsLast = durationMilliseconds;
+        }
+
+        private void HandleChanges() { GetVideoRequestManager().OnVideoRequestsChanged(); }
+
+        public void ClearAttributes()
+        {
+            ClearAttributesInternal();
+            HandleChanges();
+        }
+        private void ClearAttributesInternal()
+        {
+            // Traditional Syncing
+            SetOwnerLocal(gameObject);
             isClaimed = false;
             requestTimeMilliseconds = -1;
             requestorUsername = null;
             url = VRCUrl.Empty;
             startTimeMilliseconds = -1;
             durationMilliseconds = -1;
-            changesRegistered = false;
-            HandleChanges();
         }
 
         public bool IsValid()

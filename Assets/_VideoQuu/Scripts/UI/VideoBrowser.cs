@@ -103,7 +103,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             RefreshUI();
         }
 
-        // This is called from UIManager via SendCustomEvent
+        // This is called via SendCustomEvent
         public void HandleClick()
         {
             // TODO: any reason to keep a reference to the button? just pop the click data directly?

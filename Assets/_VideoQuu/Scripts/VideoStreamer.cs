@@ -24,41 +24,45 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
 
             if (videoRequest != null)
             {
-
-                // if (videoRequest != videoRequestLast) {  }
-
-                if (!GetBaseVRCVideoPlayer().IsReady)
-                {
-                    TryLoad(videoRequest);
-                }
+                if (videoRequest != videoRequestLast) { ForceLoad(videoRequest); }
                 else
                 {
-                    if (!GetBaseVRCVideoPlayer().IsPlaying)
+                    if (!GetBaseVRCVideoPlayer().IsReady)
                     {
-                        GetBaseVRCVideoPlayer().Play();
+                        TryLoad(videoRequest);
+                    }
+                    else
+                    {
+                        if (!GetBaseVRCVideoPlayer().IsPlaying)
+                        {
+                            GetBaseVRCVideoPlayer().Play();
+                        }
                     }
                 }
             }
             else
             {
-                // Stop player etc
+                GetBaseVRCVideoPlayer().Stop();
             }
 
             videoRequestLast = videoRequest;
         }
 
-        private int lastLoadAttemptTime = -1;
+        private int loadTimeLast = -1;
         private const int loadTimeCooldownMilliseconds = 10000;
         private void TryLoad(VideoRequest videoRequest)
         {
             int networkTime = videoRequest.GetVideoRequestManager().GetNetworkTimeMilliseconds();
-            if (lastLoadAttemptTime == -1 || (networkTime - lastLoadAttemptTime) >= loadTimeCooldownMilliseconds)
-            {
-                VRCUrl url = videoRequest.GetUrl();
-                Debug.Log($"Attempting to Load: {url}");
-                GetBaseVRCVideoPlayer().LoadURL(url);
-                lastLoadAttemptTime = networkTime;
-            }
+            if (loadTimeLast == -1 || (networkTime - loadTimeLast) >= loadTimeCooldownMilliseconds) { ForceLoad(videoRequest); }
+        }
+
+        private void ForceLoad(VideoRequest videoRequest)
+        {
+            int networkTime = videoRequest.GetVideoRequestManager().GetNetworkTimeMilliseconds();
+            VRCUrl url = videoRequest.GetUrl();
+            Debug.Log($"Attempting to Load: {url.Get()}");
+            GetBaseVRCVideoPlayer().LoadURL(url);
+            loadTimeLast = networkTime;
         }
 
         // Lazy loading caches

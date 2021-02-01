@@ -68,6 +68,27 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
         // This is called via SendCustomEvent from VideoRequestManager
         public void OnVideoRequestsChanged() { SetVideoRequests(videoRequestManager.GetVideoRequestsSortedCache()); }
 
+        // This is called via SendCustomEvent
+        public void HandleClick()
+        {
+            // TODO: any reason to keep a reference to the button? just pop the click data directly?
+            MenuButton pendingClick = menuu.PopMenuButtonPending();
+            string[] clickData = pendingClick.GetClickData();
+
+            if (clickData.Length > 0)
+            {
+                string clickType = clickData[0];
+
+                if (clickType == CLICK_TYPE_QUEUE_ITEM_SKIP)
+                {
+                    int skipIndex = int.Parse(clickData[1]);
+
+                    videoRequests[skipIndex].ClearAttributes();
+                    // videoRequestManager
+                }
+            }
+        }
+
         public void RefreshUI()
         {
             if (queueItemPanels == null)
