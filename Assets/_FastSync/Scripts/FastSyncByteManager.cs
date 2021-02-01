@@ -37,12 +37,14 @@ namespace Dustuu.VRChat.FastSync
                 GetFastSyncBytesChanged()[indexOfFastSyncByteChanged] = true;
                 if (AllFastSyncBytesChanged())
                 {
+                    Debug.Log("[FastSync] FastSyncByteManager: HandleChange, ALL changed!");
                     // Update the data
                     for (int i = 0; i < GetData().Length; i++) { GetData()[i] = GetFastSyncBytes()[i].GetData(); }
                     // Reset the change list
                     for (int i = 0; i < GetFastSyncBytesChanged().Length; i++) { GetFastSyncBytesChanged()[i] = false; }
                     FastSyncByteManagerChanged();
                 }
+                else { Debug.Log("[FastSync] FastSyncByteManager: HandleChange, NOT all changed!"); }
             }
             else { Debug.LogError("[FastSync] FastSyncByteManager: Attempted to call HandleChange with unrelated FastSyncByte"); }
         }

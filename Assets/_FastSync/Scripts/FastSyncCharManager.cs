@@ -15,11 +15,13 @@ namespace Dustuu.VRChat.FastSync
 
         private void FastSyncCharManagerChanged()
         {
+            Debug.Log("FastSyncCharManagerChanged");
             if (fastSyncCharManagerChangedSubscribers == null) { return; }
 
             // Alert subscribers
             foreach (UdonSharpBehaviour fastSyncCharManagerChangedSubscriber in fastSyncCharManagerChangedSubscribers)
             { fastSyncCharManagerChangedSubscriber.SendCustomEvent("OnFastSyncCharManagerChanged"); }
+            Debug.Log("FastSyncCharManagerChanged Complete");
         }
 
         // Call this method to change the chars
@@ -37,12 +39,14 @@ namespace Dustuu.VRChat.FastSync
                 GetFastSyncCharsChanged()[indexOfFastSyncCharChanged] = true;
                 if (AllFastSyncCharsChanged())
                 {
+                    Debug.Log("[FastSync] FastSyncCharManager: HandleChange, ALL changed!");
                     // Update the data
                     for (int i = 0; i < GetData().Length; i++) { GetData()[i] = GetFastSyncChars()[i].GetData(); }
                     // Reset the change list
                     for (int i = 0; i < GetFastSyncCharsChanged().Length; i++) { GetFastSyncCharsChanged()[i] = false; }
                     FastSyncCharManagerChanged();
                 }
+                else { Debug.Log("[FastSync] FastSyncCharManager: HandleChange, NOT all changed!"); }
             }
             else { Debug.LogError("[FastSync] FastSyncCharManager: Attempted to call HandleChange with unrelated FastSyncChar"); }
         }
