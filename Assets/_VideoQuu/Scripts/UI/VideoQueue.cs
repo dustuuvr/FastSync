@@ -115,7 +115,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
         }
 
         // TODO: Add admin support
-        private bool CanSkip(VideoRequest videoRequest) { return Networking.LocalPlayer.displayName == videoRequest.GetRequestorUsername(); }
+        private bool CanSkip(VideoRequest videoRequest)
+        { return Networking.LocalPlayer.displayName == videoRequest.GetRequestorUsername() && Networking.IsOwner(videoRequest.gameObject); }
 
         private VideoRequest[] videoRequests;
         public VideoRequest[] GetVideoRequests() { return videoRequests != null ? videoRequests : videoRequests = new VideoRequest[0]; }
