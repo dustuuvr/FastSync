@@ -22,7 +22,64 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         {
             VideoRequest videoRequest = videoRequests != null && videoRequests.Length > 0 ? videoRequests[0] : null;
 
-            if (videoRequest != null)
+            if (videoRequest == null)
+            {
+                GetBaseVRCVideoPlayer().Stop();
+            }
+            else if (videoRequest != videoRequestLast)
+            {
+                GetBaseVRCVideoPlayer().Stop();
+                videoRequestLast = videoRequest;
+            }
+            else if (videoRequest.HasEnded())
+            {
+                GetBaseVRCVideoPlayer().Stop();
+                videoRequest.ClearAttributes();
+            }
+            else if (!GetBaseVRCVideoPlayer().IsReady)
+            {
+                TryLoad(videoRequest);
+            }
+            else if (!GetBaseVRCVideoPlayer().IsPlaying)
+            {
+                if (Networking.IsOwner(videoRequest.gameObject) && !videoRequest.HasEndTimeMilliseconds())
+                {
+                    int currentTimeMilliseconds = videoRequestManager.GetNetworkTimeMilliseconds();
+                    // TODO: Add delay here
+                    int durationMilliseconds = GetVideoDurationMilliseconds();
+                    if (durationMilliseconds != -1)
+                    {
+                        int endTimeMilliseconds = currentTimeMilliseconds + durationMilliseconds;
+                        Debug.Log($"Playing video at {currentTimeMilliseconds} for duration {durationMilliseconds} until end time {endTimeMilliseconds}");
+                        videoRequest.SetEndTimeMilliseconds(endTimeMilliseconds);
+                    }
+                }
+
+                if (HasVideoTimeMilliseconds(videoRequest))
+                {
+                    int videoTimeMilliseconds = GetVideoTimeMilliseconds(videoRequest);
+                    float videoTimeSeconds = videoTimeMilliseconds / 1000f;
+                    if (videoTimeSeconds >= 0) { TryPlay(videoTimeSeconds); }
+                }
+            }
+            else
+            {
+                if (HasVideoTimeMilliseconds(videoRequest))
+                {
+                    int videoTimeMilliseconds = GetVideoTimeMilliseconds(videoRequest);
+                    float videoTimeSeconds = videoTimeMilliseconds / 1000f;
+
+                    float videoPlayerTimeSeconds = GetBaseVRCVideoPlayer().GetTime();
+
+                    float lag = Mathf.Abs(videoTimeSeconds - videoPlayerTimeSeconds);
+                    // Debug.Log($"lag: {lag}");
+                    // TODO: Test this
+                    if (lag > 5f) { TrySync(videoTimeSeconds); }
+                }
+                else { GetBaseVRCVideoPlayer().Stop(); }
+            }
+
+            /*if (videoRequest != null)
             {
                 if (videoRequest.HasEnded()) { videoRequest.ClearAttributes(); }
                 else
@@ -83,9 +140,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             {
                 Debug.Log("STOPPING!!!");
                 GetBaseVRCVideoPlayer().Stop();
-            }
-
-            videoRequestLast = videoRequest;
+            }*/
         }
 
         private int GetVideoDurationMilliseconds()
