@@ -12,6 +12,28 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         private VideoDetail[] videoDetails;
         private VideoCollection videoCollectionParent;
 
+        // TODO: Move this in to request manager?
+        private VideoDetail[] videoDetailsAll;
+        private int videoDetailsAllNext;
+        // TODO: Make this dynamic
+        private readonly int MAX_VIDEO_DETAILS = 500;
+
+        public int RegisterVideoDetail(VideoDetail videoDetail)
+        {
+            if (GetVideoCollectionParent() != null) { return GetVideoCollectionParent().RegisterVideoDetail(videoDetail); }
+            else
+            {
+                if (videoDetailsAll == null) { videoDetailsAll = new VideoDetail[MAX_VIDEO_DETAILS]; }
+                int videoDetailID = videoDetailsAllNext;
+                videoDetailsAll[videoDetailID] = videoDetail;
+                videoDetailsAllNext++;
+                return videoDetailID;
+            }
+        }
+
+        public VideoDetail GetVideoDetailByID(int videoDetailID)
+        { return (videoDetailsAll != null && videoDetailID < videoDetailsAll.Length) ? videoDetailsAll[videoDetailID] : null; }
+
         /*public VideoCollection GetVideoCollection(string path)
         {
             string[] pathParts = path.Split(',');

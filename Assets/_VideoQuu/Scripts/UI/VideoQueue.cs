@@ -82,9 +82,9 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
                 if (clickType == CLICK_TYPE_QUEUE_ITEM_SKIP)
                 {
                     int skipIndex = int.Parse(clickData[1]);
-
-                    videoRequests[skipIndex].ClearAttributes();
-                    // videoRequestManager
+                    VideoRequest videoRequestToSkip = videoRequests[skipIndex];
+                    Networking.SetOwner(Networking.LocalPlayer, videoRequestToSkip.gameObject);
+                    videoRequestToSkip.ClearAttributes();
                 }
             }
         }

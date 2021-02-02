@@ -11,8 +11,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         // Variables required to view
         [UdonSynced] private bool isClaimed;
         [UdonSynced] private int requestTimeMilliseconds;
-        [UdonSynced] private string requestorUsername;
-        [UdonSynced] private VRCUrl url = VRCUrl.Empty;
+        [UdonSynced] private string requestorUsername; //TODO: Sync id not username
+        [UdonSynced] private int videoDetailID;
         // Variables required to play
         [UdonSynced] private int endTimeMilliseconds;
         // Caches
@@ -27,7 +27,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         private bool isClaimedLast;
         private int requestTimeMillisecondsLast;
         private string requestorUsernameLast;
-        private string urlLast;
+        private int videoDetailIDLast;
         // Variables required to play
         private int endTimeMillisecondsLast;
 
@@ -35,8 +35,9 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         public void SetEndTimeMilliseconds(int endTimeMilliseconds)
         { if (Networking.IsOwner(gameObject)) { this.endTimeMilliseconds = endTimeMilliseconds; } }
         public bool HasEndTimeMilliseconds() { return GetEndTimeMilliseconds() != -1; }
+        public bool HasEnded() { return HasEndTimeMilliseconds() && GetEndTimeMilliseconds() <= videoRequestManager.GetNetworkTimeMilliseconds(); }
 
-        private bool firstDeserialization = true;
+        /*private bool firstDeserialization = true;
         public override void OnDeserialization()
         {
             if (firstDeserialization)
@@ -51,6 +52,23 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
                 HandleChanges();
                 SetLasts();
             }
+        }*/
+
+        private bool firstUpdate = true;
+        protected void Update()
+        {
+            if (firstUpdate)
+            {
+                SetLasts();
+                firstUpdate = false;
+            }
+
+            if (HasChanged())
+            {
+                Debug.Log("Update() changes detected!");
+                HandleChanges();
+                SetLasts();
+            }
         }
 
         private bool HasChanged()
@@ -59,7 +77,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
                 isClaimed != isClaimedLast ||
                 requestTimeMilliseconds != requestTimeMillisecondsLast ||
                 requestorUsername != requestorUsernameLast ||
-                url.Get() != urlLast ||
+                videoDetailID != videoDetailIDLast ||
                 endTimeMilliseconds != endTimeMillisecondsLast;
         }
 
@@ -68,7 +86,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             isClaimedLast = isClaimed;
             requestTimeMillisecondsLast = requestTimeMilliseconds;
             requestorUsernameLast = requestorUsername;
-            urlLast = url.Get();
+            videoDetailIDLast = videoDetailID;
             endTimeMillisecondsLast = endTimeMilliseconds;
         }
 
@@ -90,15 +108,15 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
                 isClaimed = false;
                 requestTimeMilliseconds = -1;
                 requestorUsername = null;
-                url = VRCUrl.Empty;
+                videoDetailID = -1;
                 endTimeMilliseconds = -1;
             }
         }
 
         public bool IsValid()
-        { return isClaimed = true && requestTimeMilliseconds != -1 && !string.IsNullOrEmpty(requestorUsername) && url != VRCUrl.Empty; }
+        { return isClaimed = true && requestTimeMilliseconds != -1 && !string.IsNullOrEmpty(requestorUsername) && videoDetailID != -1; }
 
-        public void RequestURL(VRCUrl requestUrl)
+        public void RequestVideoDetail(VideoDetail videoDetail)
         {
             // Traditional Syncing
             if (Networking.IsOwner(gameObject))
@@ -108,7 +126,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
                     isClaimed = true;
                     requestTimeMilliseconds = GetVideoRequestManager().GetNetworkTimeMilliseconds();
                     requestorUsername = GetVideoRequestManager().GetLocalUsername();
-                    url = requestUrl;
+                    videoDetailID = videoDetail.GetID();
                     HandleChanges();
                 }
                 else { Debug.LogError("[VideoQueuePlayer] VideoRequest: Tried to call RequestURL but was claimed."); }
@@ -118,7 +136,9 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         public bool IsClaimed() { return isClaimed; }
         public int GetRequestTimeMilliseconds() { return requestTimeMilliseconds; }
         public string GetRequestorUsername() { return requestorUsername; }
-        public VRCUrl GetUrl() { return url; }
+        public int GetVideoDetailID() { return videoDetailID; }
+        public VRCUrl GetUrl() { return GetVideoRequestManager().GetVideoCollectionRoot().GetVideoDetailByID(GetVideoDetailID()).GetUrl(); }
+        // public VRCUrl GetUrl() { return videoRequestManager.; }
 
         private VideoRequestManager GetVideoRequestManager()
         { return videoRequestManager != null ? videoRequestManager : videoRequestManager = GetComponentInParent<VideoRequestManager>(); }

@@ -24,36 +24,42 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
 
             if (videoRequest != null)
             {
-                if (videoRequest != videoRequestLast) { ForceLoad(videoRequest); }
+                if (videoRequest.HasEnded()) { videoRequest.ClearAttributes(); }
                 else
                 {
-                    if (!GetBaseVRCVideoPlayer().IsReady)
+                    if (videoRequest != videoRequestLast)
                     {
-                        TryLoad(videoRequest);
+                        if ( GetBaseVRCVideoPlayer().IsPlaying ) { GetBaseVRCVideoPlayer().Stop(); }
+                        ForceLoad(videoRequest);
                     }
                     else
                     {
                         if (!GetBaseVRCVideoPlayer().IsPlaying)
                         {
-                            if (Networking.IsOwner(videoRequest.gameObject) && !videoRequest.HasEndTimeMilliseconds())
+                            if (!GetBaseVRCVideoPlayer().IsReady) { TryLoad(videoRequest); }
+                            else
                             {
-                                int currentTimeMilliseconds = videoRequestManager.GetNetworkTimeMilliseconds();
-                                // TODO: Add delay here
-                                int durationMilliseconds = GetVideoDurationMilliseconds();
-                                if (durationMilliseconds != -1)
+                                if (Networking.IsOwner(videoRequest.gameObject) && !videoRequest.HasEndTimeMilliseconds())
                                 {
-                                    int endTimeMilliseconds = currentTimeMilliseconds + durationMilliseconds;
-                                    Debug.Log($"Playing video at {currentTimeMilliseconds} for duration {durationMilliseconds} until end time {endTimeMilliseconds}");
-                                    videoRequest.SetEndTimeMilliseconds(endTimeMilliseconds);
+                                    int currentTimeMilliseconds = videoRequestManager.GetNetworkTimeMilliseconds();
+                                    // TODO: Add delay here
+                                    int durationMilliseconds = GetVideoDurationMilliseconds();
+                                    if (durationMilliseconds != -1)
+                                    {
+                                        int endTimeMilliseconds = currentTimeMilliseconds + durationMilliseconds;
+                                        Debug.Log($"Playing video at {currentTimeMilliseconds} for duration {durationMilliseconds} until end time {endTimeMilliseconds}");
+                                        videoRequest.SetEndTimeMilliseconds(endTimeMilliseconds);
+                                    }
+                                }
+
+                                if (HasVideoTimeMilliseconds(videoRequest))
+                                {
+                                    int videoTimeMilliseconds = GetVideoTimeMilliseconds(videoRequest);
+                                    float videoTimeSeconds = videoTimeMilliseconds / 1000f;
+                                    if (videoTimeSeconds >= 0) { TryPlay(videoTimeSeconds); }
                                 }
                             }
-
-                            if (HasVideoTimeMilliseconds(videoRequest))
-                            {
-                                int videoTimeMilliseconds = GetVideoTimeMilliseconds(videoRequest);
-                                float videoTimeSeconds = videoTimeMilliseconds / 1000f;
-                                if (videoTimeSeconds >= 0) { TryPlay(videoTimeSeconds); }
-                            }
+                            
                         }
                         else
                         {
@@ -75,6 +81,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             }
             else
             {
+                Debug.Log("STOPPING!!!");
                 GetBaseVRCVideoPlayer().Stop();
             }
 
@@ -134,7 +141,6 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         private const int syncTimeCooldownMilliseconds = 10000;
         private void TrySync(float time)
         {
-            Debug.Log($"Trying to sync to time: {time}");
             if (GetBaseVRCVideoPlayer().IsPlaying)
             {
                 int networkTime = videoRequestManager.GetNetworkTimeMilliseconds();

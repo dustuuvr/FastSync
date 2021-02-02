@@ -54,10 +54,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.Editor
                     string detailUrl = lineParts[lineParts.Length - 1];
 
                     Transform last = selectedVideoCollectionGameObject.transform;
-                    for (int i = 0; i < collectionTitles.Length; i++)
+                    foreach (string collectionTitle in collectionTitles)
                     {
-                        string collectionTitle = collectionTitles[i];
-
                         Transform next = last.Find(collectionTitle);
                         if ( next == null )
                         {

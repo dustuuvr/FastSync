@@ -9,20 +9,23 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
 {
     public class VideoRequestManager : UdonSharpBehaviour
     {
+        [SerializeField] private VideoCollection videoCollectionRoot;
+        public VideoCollection GetVideoCollectionRoot() { return videoCollectionRoot; }
+
         public readonly int MAX_ACTIVE_REQUESTS_TOTAL = 15;
 
         private VideoRequest[] videoRequests;
         private VideoRequest[] videoRequestsFilteredCache;
 
-        public void MakeRequest(VRCUrl url)
+        public void MakeRequest(VideoDetail videoDetail)
         {
             VideoRequest randomUnclaimedVideoRequest = GetRandomUnclaimedVideoRequest();
             if (randomUnclaimedVideoRequest != null)
             {
                 Networking.SetOwner(Networking.LocalPlayer, randomUnclaimedVideoRequest.gameObject);
-                randomUnclaimedVideoRequest.RequestURL(url);
+                randomUnclaimedVideoRequest.RequestVideoDetail(videoDetail);
             }
-            else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({url.Get()})."); }
+            else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({videoDetail.GetUrl().Get()})."); }
         }
 
         public void AddEventSubscriberOnVideoRequestsChanged(UdonSharpBehaviour eventSubscriberOnVideoRequestsChanged)

@@ -57,7 +57,7 @@ MonoBehaviour:
   aspectRatio: 2
   targetAudioSources:
   - {fileID: 2577661109554387396}
-  maximumResolution: 1920
+  maximumResolution: 240
 --- !u!114 &8652352606187730155
 MonoBehaviour:
   m_ObjectHideFlags: 0

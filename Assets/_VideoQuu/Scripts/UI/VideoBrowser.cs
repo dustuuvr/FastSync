@@ -21,7 +21,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
 
         private readonly string BACK_TEXT = "←";
         private readonly string TOP_TEXT = "↑";
-        private readonly int MAX_SCROLL_ITEMS = 10;
+        // TODO: Make this more dynamic
+        private readonly int MAX_SCROLL_ITEMS = 40;
 
         [SerializeField] MenuCreator menuuCreator;
         [SerializeField] private VideoRequestManager videoRequestManager;
@@ -37,14 +38,15 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
         }
 
         private Menu menuu;
-        private MenuButton backButton;
 
         private MenuPanel videoCollectionPanel;
+        private MenuButton videoCollectionBackButton;
         private MenuButton videoCollectionTopButton;
         private MenuScrollView videoCollectionScrollView;
         private MenuButton[] videoCollectionButtons;
 
         private MenuPanel videoDetailPanel;
+        private MenuButton videoDetailBackButton;
         private MenuButton videoDetailTopButton;
         private MenuScrollView videoDetailScrollView;
         private MenuButton[] videoDetailButtons;
@@ -59,11 +61,6 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             // Controls
             MenuPanelHorizontal mainControlsPanel = menuu.CreateMenuPanelHorizontal(mainPanel.GetRectTransform());
             mainControlsPanel.GetLayoutElement().minHeight = menuuCreator.MIN_HEIGHT_H1;
-            // Back Button
-            backButton = menuu.CreateMenuButton(mainControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_BACK });
-            backButton.SetText(BACK_TEXT);
-            backButton.SetFontSize(menuuCreator.FONT_SIZE_H1);
-            backButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
             // Label
             MenuButton mainPanelLabelButton = menuu.CreateMenuButton(mainControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_NONE });
             mainPanelLabelButton.SetText("Song Browser");
@@ -76,16 +73,22 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             // Controls
             MenuPanelHorizontal videoCollectionControlsPanel = menuu.CreateMenuPanelHorizontal(videoCollectionPanel.GetRectTransform());
             videoCollectionControlsPanel.GetLayoutElement().minHeight = menuuCreator.MIN_HEIGHT_H2;
-            // Top Button
-            videoCollectionTopButton = menuu.CreateMenuButton(videoCollectionControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_VIDEO_COLLECTION_TOP });
-            videoCollectionTopButton.SetText(TOP_TEXT);
-            videoCollectionTopButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
-            videoCollectionTopButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
+            // Back Button
+            videoCollectionBackButton = menuu.CreateMenuButton(videoCollectionControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_BACK });
+            videoCollectionBackButton.SetText(BACK_TEXT);
+            videoCollectionBackButton.SetFontSize(menuuCreator.FONT_SIZE_H1);
+            videoCollectionBackButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
             // Label
             MenuButton videoCollectionLabelButton = menuu.CreateMenuButton(videoCollectionControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_NONE });
             videoCollectionLabelButton.SetText("Folders");
             videoCollectionLabelButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
             videoCollectionLabelButton.GetLayoutElement().preferredWidth = menuuCreator.MAX_EXPAND;
+            // Top Button
+            videoCollectionTopButton = menuu.CreateMenuButton(videoCollectionControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_VIDEO_COLLECTION_TOP });
+            videoCollectionTopButton.SetText(TOP_TEXT);
+            videoCollectionTopButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
+            videoCollectionTopButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
+            
             // Scroll View
             videoCollectionScrollView = menuu.CreateMenuScrollView(videoCollectionPanel.GetRectTransform());
             videoCollectionScrollView.GetLayoutElement().preferredHeight = menuuCreator.MAX_EXPAND;
@@ -99,16 +102,21 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             // Controls
             MenuPanelHorizontal videoDetailControlsPanel = menuu.CreateMenuPanelHorizontal(videoDetailPanel.GetRectTransform());
             videoDetailControlsPanel.GetLayoutElement().minHeight = menuuCreator.MIN_HEIGHT_H2;
-            // Top Button
-            videoDetailTopButton = menuu.CreateMenuButton(videoDetailControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_VIDEO_DETAIL_TOP });
-            videoDetailTopButton.SetText(TOP_TEXT);
-            videoDetailTopButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
-            videoDetailTopButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
+            // Back Button
+            videoDetailBackButton = menuu.CreateMenuButton(videoDetailControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_BACK });
+            videoDetailBackButton.SetText(BACK_TEXT);
+            videoDetailBackButton.SetFontSize(menuuCreator.FONT_SIZE_H1);
+            videoDetailBackButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
             // Label
             MenuButton videoDetailLabelButton = menuu.CreateMenuButton(videoDetailControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_NONE });
             videoDetailLabelButton.SetText("Files");
             videoDetailLabelButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
             videoDetailLabelButton.GetLayoutElement().preferredWidth = menuuCreator.MAX_EXPAND;
+            // Top Button
+            videoDetailTopButton = menuu.CreateMenuButton(videoDetailControlsPanel.GetRectTransform(), new string[] { CLICK_TYPE_VIDEO_DETAIL_TOP });
+            videoDetailTopButton.SetText(TOP_TEXT);
+            videoDetailTopButton.SetFontSize(menuuCreator.FONT_SIZE_H2);
+            videoDetailTopButton.GetLayoutElement().minWidth = menuuCreator.MIN_WIDTH_UTIL_BUTTON;
             // Scroll View
             videoDetailScrollView = menuu.CreateMenuScrollView(videoDetailPanel.GetRectTransform());
             videoDetailScrollView.GetLayoutElement().preferredHeight = menuuCreator.MAX_EXPAND;
@@ -117,6 +125,12 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             { videoDetailButtons[i] = menuu.CreateMenuButton(videoDetailScrollView.GetContentRoot(), new string[] { CLICK_TYPE_VIDEO_DETAIL, i.ToString() }); }
 
             RefreshUI();
+        }
+
+        protected void Update()
+        {
+            videoCollectionTopButton.SetInteractable(videoCollectionScrollView.GetContentRoot().GetComponent<RectTransform>().localPosition.y > 0.1f);
+            videoDetailTopButton.SetInteractable(videoDetailScrollView.GetContentRoot().GetComponent<RectTransform>().localPosition.y > 0.1f);
         }
 
         // This is called via SendCustomEvent
@@ -144,7 +158,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
                     VideoDetail videoDetailClicked = GetVideoCollectionView().GetVideoDetailByIndex(videoDetailIndex);
                     if (videoDetailClicked != null)
                     {
-                        videoRequestManager.MakeRequest(videoDetailClicked.GetUrl());
+                        videoRequestManager.MakeRequest(videoDetailClicked);
                         SetVideoCollectionView(videoCollectionRoot);
                     }
                 }
@@ -153,6 +167,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
                     VideoCollection videoCollectionParent = GetVideoCollectionView().GetVideoCollectionParent();
                     if (videoCollectionParent != null) { SetVideoCollectionView(videoCollectionParent); }
                 }
+                else if (clickType == CLICK_TYPE_VIDEO_COLLECTION_TOP) { videoCollectionScrollView.ResetScrollRect(); }
+                else if (clickType == CLICK_TYPE_VIDEO_DETAIL_TOP) { videoDetailScrollView.ResetScrollRect(); }
             }
         }
 
@@ -162,6 +178,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             if (videoCollections.Length > 0)
             {
                 videoCollectionPanel.gameObject.SetActive(true);
+                videoCollectionBackButton.SetInteractable(CanGoBack());
                 for (int i = 0; i < videoCollectionButtons.Length; i++)
                 {
                     MenuButton videoCollectionButton = videoCollectionButtons[i];
@@ -181,6 +198,7 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             if (videoDetails.Length > 0)
             {
                 videoDetailPanel.gameObject.SetActive(true);
+                videoDetailBackButton.SetInteractable(CanGoBack());
                 for (int i = 0; i < videoDetailButtons.Length; i++)
                 {
                     MenuButton videoDetailButton = videoDetailButtons[i];
@@ -195,8 +213,8 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem.UI
             }
             else { videoDetailPanel.gameObject.SetActive(false); }
             videoDetailScrollView.ResetScrollRect();
-
-            backButton.SetInteractable(GetVideoCollectionView().GetVideoCollectionParent() != null);
         }
+
+        private bool CanGoBack() { return GetVideoCollectionView().GetVideoCollectionParent() != null; }
     }
 }
