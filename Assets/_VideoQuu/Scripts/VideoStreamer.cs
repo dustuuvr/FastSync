@@ -35,7 +35,35 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
                     {
                         if (!GetBaseVRCVideoPlayer().IsPlaying)
                         {
-                            GetBaseVRCVideoPlayer().Play();
+                            if (Networking.IsOwner(videoRequest.gameObject) && !videoRequest.HasEndTimeMilliseconds())
+                            {
+                                int currentTimeMilliseconds = videoRequestManager.GetNetworkTimeMilliseconds();
+                                // TODO: Add delay here
+                                int durationMilliseconds = GetVideoDurationMilliseconds();
+                                if (durationMilliseconds != -1)
+                                {
+                                    int endTimeMilliseconds = currentTimeMilliseconds + durationMilliseconds;
+                                    Debug.Log($"Playing video at {currentTimeMilliseconds} for duration {durationMilliseconds} until end time {endTimeMilliseconds}");
+                                    videoRequest.SetEndTimeMilliseconds(endTimeMilliseconds);
+                                }
+                            }
+
+                            if (videoRequest.HasEndTimeMilliseconds())
+                            {
+                                int durationMilliseconds = GetVideoDurationMilliseconds();
+
+                                if (durationMilliseconds != -1)
+                                {
+                                    int videoStartTimeMilliseconds = videoRequest.GetEndTimeMilliseconds() - durationMilliseconds;
+                                    int videoTimeMilliseconds = videoRequestManager.GetNetworkTimeMilliseconds() - videoStartTimeMilliseconds;
+                                    float videoTimeSeconds = videoTimeMilliseconds / 1000f;
+                                    if (videoTimeSeconds >= 0) { TryPlay(videoTimeSeconds); }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Sync / lag here
                         }
                     }
                 }
@@ -48,22 +76,45 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
             videoRequestLast = videoRequest;
         }
 
+        private int GetVideoDurationMilliseconds()
+        { return GetBaseVRCVideoPlayer().IsReady ? Mathf.RoundToInt(GetBaseVRCVideoPlayer().GetDuration() * 1000) : -1; }
+
         private int loadTimeLast = -1;
         private const int loadTimeCooldownMilliseconds = 10000;
         private void TryLoad(VideoRequest videoRequest)
         {
-            int networkTime = videoRequest.GetVideoRequestManager().GetNetworkTimeMilliseconds();
+            int networkTime = videoRequestManager.GetNetworkTimeMilliseconds();
             if (loadTimeLast == -1 || (networkTime - loadTimeLast) >= loadTimeCooldownMilliseconds) { ForceLoad(videoRequest); }
         }
-
         private void ForceLoad(VideoRequest videoRequest)
         {
-            int networkTime = videoRequest.GetVideoRequestManager().GetNetworkTimeMilliseconds();
+            int networkTime = videoRequestManager.GetNetworkTimeMilliseconds();
             VRCUrl url = videoRequest.GetUrl();
             Debug.Log($"Attempting to Load: {url.Get()}");
             GetBaseVRCVideoPlayer().LoadURL(url);
             loadTimeLast = networkTime;
         }
+
+        private int playTimeLast = -1;
+        private const int playTimeCooldownMilliseconds = 10000;
+        private void TryPlay(float time)
+        {
+            if (GetBaseVRCVideoPlayer().IsReady && !GetBaseVRCVideoPlayer().IsPlaying)
+            {
+                int networkTime = videoRequestManager.GetNetworkTimeMilliseconds();
+                if (playTimeLast == -1 || (networkTime - playTimeLast) >= playTimeCooldownMilliseconds)
+                { ForcePlay(time); }
+            }
+            
+        }
+        private void ForcePlay(float time)
+        {
+            Debug.Log($"Attempting to Play at time: {time}");
+            GetBaseVRCVideoPlayer().SetTime(time);
+            GetBaseVRCVideoPlayer().Play();
+            playTimeLast = videoRequestManager.GetNetworkTimeMilliseconds();
+        }
+
 
         // Lazy loading caches
         private BaseVRCVideoPlayer baseVrcVideoPlayer;

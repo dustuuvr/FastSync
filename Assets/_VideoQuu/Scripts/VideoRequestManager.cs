@@ -17,7 +17,11 @@ namespace Dustuu.VRChat.Uutils.VideoQuuSystem
         public void MakeRequest(VRCUrl url)
         {
             VideoRequest randomUnclaimedVideoRequest = GetRandomUnclaimedVideoRequest();
-            if (randomUnclaimedVideoRequest != null) { randomUnclaimedVideoRequest.RequestURL(url); }
+            if (randomUnclaimedVideoRequest != null)
+            {
+                Networking.SetOwner(Networking.LocalPlayer, randomUnclaimedVideoRequest.gameObject);
+                randomUnclaimedVideoRequest.RequestURL(url);
+            }
             else { Debug.LogError($"[VideoQueuePlayer] VideoRequestManager: Failed to run MakeRequest({url.Get()})."); }
         }
 
